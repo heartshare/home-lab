@@ -1,0 +1,122 @@
+- name: Update apt cache
+  raw: apt-get -y update
+
+- name: If needed, install Python
+  raw: apt-get -y install python python-pip
+
+- name: Install base dependencies
+  apt: 
+    name: 
+      - snapd
+    state: present 
+  become: yes
+
+- name: Check is ufw installed
+  shell: command -v ufw >/dev/null 2>&1
+  register: is_ufw_exist
+  ignore_errors: yes
+
+- name: Disabling ufw
+  command: ufw disable
+  become: yes
+  when: is_ufw_exist.rc == 0
+
+- name: Set ip forwarding
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+
+- name: Disable Swap
+  command: swapoff -a
+
+- name: Install microk8s
+  become: yes
+  snap:
+    name: microk8s
+    classic: yes
+    channel: "{{ microk8s_version }}"
+
+- name: Update Microk8s docker-daemon.json file
+  template:
+    src: "docker-daemon.json"
+    dest: "/var/snap/microk8s/current/args/docker-daemon.json"
+    owner: "root"
+    group: "root"
+
+- name: Microk8s status
+  shell: source /etc/profile.d/apps-bin-path.sh && microk8s.status --wait-ready
+  args:
+    executable: /bin/bash
+
+- name: Allow Privileged for Kubelet (needed by Elasticsearch Helm chart)
+  lineinfile:
+    dest: /var/snap/microk8s/current/args/kubelet
+    line: "--allow-privileged=true"
+    state: present
+
+- name: Allow Privileged for K8s Apiserver (needed by Elasticsearch Helm chart)
+  lineinfile:
+    dest: /var/snap/microk8s/current/args/kube-apiserver
+    line: "--allow-privileged=true"
+    state: present
+
+- name: Set File Descriptor Limits for Microk8s
+  lineinfile:
+    dest: /var/snap/microk8s/current/args/containerd-env
+    line: "ulimit -n 65536"
+    state: present
+
+- name: Add Insecure Registries
+  import_tasks: add-insecure-registries.yml
+
+- name: Stop Microk8s
+  shell: source /etc/profile.d/apps-bin-path.sh && microk8s.stop
+  args:
+    executable: /bin/bash
+
+- name: Start Microk8s
+  shell: source /etc/profile.d/apps-bin-path.sh && microk8s.start
+  args:
+    executable: /bin/bash
+
+- name: Microk8s status
+  shell: source /etc/profile.d/apps-bin-path.sh && microk8s.status --wait-ready
+  args:
+    executable: /bin/bash
+
+- name: Microk8s inspect
+  shell: source /etc/profile.d/apps-bin-path.sh && microk8s.inspect
+  args:
+    executable: /bin/bash
+
+- name: Alias kubectl
+  shell: "source /etc/profile.d/apps-bin-path.sh && snap alias microk8s.kubectl kubectl"
+  args:
+    executable: /bin/bash
+
+- name: Alias docker
+  shell: "source /etc/profile.d/apps-bin-path.sh && snap alias microk8s.docker docker"
+  args:
+    executable: /bin/bash
+
+- name: Enable dns
+  shell: "source /etc/profile.d/apps-bin-path.sh && microk8s.enable dns"
+  args:
+    executable: /bin/bash
+
+- name: Enable ingress
+  shell: "source /etc/profile.d/apps-bin-path.sh && microk8s.enable ingress"
+  args:
+    executable: /bin/bash
+
+- name: Enable storage
+  shell: "source /etc/profile.d/apps-bin-path.sh && microk8s.enable storage"
+  args:
+    executable: /bin/bash
+
+- name: Enable K8s Dashboard
+  shell: "source /etc/profile.d/apps-bin-path.sh && /snap/bin/microk8s.enable dashboard"
+  when: k8s_dashboard|default(False)|bool == True
+  args:
+    executable: /bin/bash

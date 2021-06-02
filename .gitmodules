@@ -1,0 +1,3 @@
+[submodule "ansible/roles/ansible-role-microk8s"]
+	path = ansible/roles/ansible-role-microk8s
+	url = https://github.com/accanto-systems/ansible-role-microk8s.git

@@ -1,0 +1,63 @@
+---
+# tasks file for proxmox
+- name: Copy source.list
+  template:
+    src: "sources.list.j2"
+    dest: "/etc/apt/sources.list"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Copy pve-enterprise.list
+  template:
+    src: "pve-enterprise.list.j2"
+    dest: "/etc/apt/sources.list.d/pve-enterprise.list"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+  become: true
+
+- name: Install the packages
+  apt:
+    name: "{{ proxmoxloop }}"
+    state: latest
+  with_items:
+      - ifupdown2
+      - vim
+      - openvswitch-switch
+      - lm-sensors
+      - fancontrol
+  loop_control:
+    loop_var: proxmoxloop
+  become: true
+
+- name: Copy no-nag-script
+  template:
+    src: "no-nag-script.j2"
+    dest: "/etc/apt/apt.conf.d/no-nag-script"
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
+- name: Restart pveproxy.service
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: pveproxy
+  become: true
+
+- name: Force-reinstall proxmox-widget-toolkit
+  shell: apt-get --reinstall install proxmox-widget-toolkit
+  become: true
