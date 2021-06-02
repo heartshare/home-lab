@@ -118,7 +118,7 @@ At the time of this repo creation the following versions are the latests and wor
 2. Run Ansible against the IP you used for the proxmox server
   - `$ ansible all -i 192.168.1.22, -m include_role -a name=proxmox -u root`<br>
     For more info on what this installs look into the ansible folder  [here](/ansible)
-    
+
 ---
 
 <!-- ROADMAP -->
@@ -183,12 +183,9 @@ Project Link: [https://github.com/your_username/repo_name](https://github.com/yo
 [issues-shield]: https://img.shields.io/github/issues/stiliajohny/Repo-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/stiliajohny/Repo-Template/issues
 [license-shield]: https://img.shields.io/github/license/stiliajohny/Repo-Template?style=for-the-badge
-[license-url]: https://github.com/stiliajohny/Repo-Template/blob/master/LICENSE.txt
+[license-url]: https://github.com/stiliajohny/Repo-Template/blob/main/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/johnstilia/
 [product-screenshot]: .assets/screenshot.png
 [ask-me-anything]: https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg?style=for-the-badge
 [personal-page]: https://github.com/stiliajohny
-
-https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-https://img.shields.io/github/license/stiliajohny/Repo-Template.svg?style=for-the-badge
