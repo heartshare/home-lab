@@ -1,4 +1,4 @@
 ---
 - hosts: all
   roles:
-    - ansible-role-microk8s
+    - ansible-role-kubernetes
